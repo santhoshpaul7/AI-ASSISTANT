@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f6f5">
+  <title>Signal BI | Sales intelligence</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+    :root{color-scheme:light;--ink:#172522;--muted:#6d7b76;--line:#dce5e1;--paper:#f3f6f5;--white:#fff;--green:#146b55;--lime:#d8f36a;--blue:#8ebfc6;--red:#a43d35;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--display:'Manrope',sans-serif}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);}
+    button,input{font:inherit}
+    .ambient{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background-image:linear-gradient(rgba(23,37,34,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(23,37,34,.035) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,black,transparent 82%)}
+    .ambient:before,.ambient:after{content:"";position:absolute;border:1px solid rgba(20,107,85,.12);border-radius:50%;transform:rotate(-25deg)}
+    .ambient:before{width:min(74vw,900px);height:min(40vw,490px);right:-12%;top:7%;box-shadow:0 0 0 44px rgba(20,107,85,.025),0 0 0 88px rgba(20,107,85,.02)}
+    .ambient:after{width:min(60vw,720px);height:min(29vw,350px);right:-7%;top:13%;border-color:rgba(34,116,132,.13);box-shadow:inset 0 0 0 34px rgba(34,116,132,.025)}
+    .shell{width:min(1140px,calc(100% - 48px));margin:0 auto}
+    header{height:78px;border-bottom:1px solid rgba(23,37,34,.1);display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+    .brand-mark{width:36px;height:36px;border-radius:10px;background:var(--green);display:grid;place-items:center;box-shadow:0 5px 16px rgba(20,107,85,.2)}
+    .brand-mark svg{width:22px;height:22px}
+    .brand-name{font:800 17px var(--display);letter-spacing:0}
+    .brand-name span{color:var(--green)}
+    .header-meta{display:flex;align-items:center;gap:18px;color:var(--muted);font-size:13px}
+    .dataset-state{display:flex;align-items:center;gap:8px}
+    .live-dot{height:8px;width:8px;border-radius:50%;background:#48a879;box-shadow:0 0 0 4px rgba(72,168,121,.12)}
+    main{padding:62px 0 88px}
+    .intro{max-width:760px;position:relative}
+    .eyebrow{display:flex;align-items:center;gap:10px;color:var(--green);font:500 11px var(--mono);letter-spacing:0;text-transform:uppercase}
+    .eyebrow:before{content:"";height:1px;width:24px;background:var(--green)}
+    h1{font:700 clamp(38px,5vw,58px)/1.08 var(--display);letter-spacing:0;margin:19px 0 14px;max-width:720px}
+    h1 em{font-style:normal;color:var(--green)}
+    .intro-copy{max-width:580px;color:#66746f;font-size:16px;margin:0}
+    .insight-orbit{position:absolute;right:5%;top:4px;width:130px;height:130px;border:1px solid rgba(20,107,85,.2);border-radius:50%;display:grid;place-items:center;transform:rotate(-18deg)}
+    .insight-orbit:before,.insight-orbit:after{content:"";position:absolute;border:1px solid rgba(20,107,85,.2);border-radius:50%;inset:15px;transform:rotate(48deg) scaleX(.55)}
+    .insight-orbit:after{inset:26px;transform:rotate(-42deg) scaleX(.55)}
+    .orbit-core{height:28px;width:28px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 8px rgba(216,243,106,.22);z-index:1}
+    .ask-panel{margin-top:42px;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:9px;box-shadow:0 16px 50px rgba(23,37,34,.07);max-width:880px}
+    .ask-row{display:flex;align-items:center;gap:12px;padding:4px 5px 8px 11px}
+    .spark{flex:0 0 23px;color:var(--green);font-size:20px;line-height:1}
+    #q{border:0;outline:0;min-width:0;flex:1;padding:13px 0;background:transparent;color:var(--ink);font-size:16px}
+    #q::placeholder{color:#98a39f}
+    .go{border:0;border-radius:8px;background:var(--green);color:white;padding:11px 18px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .18s,transform .18s}
+    .go:hover{background:#0e5846;transform:translateY(-1px)}
+    .go:disabled{opacity:.65;cursor:wait;transform:none}
+    .go svg{height:16px;width:16px}
+    .ask-foot{border-top:1px solid #edf1ef;padding:10px 12px 4px;display:flex;align-items:center;justify-content:space-between;color:#87938e;font:11px var(--mono)}
+    .suggestions{margin-top:32px;max-width:880px}
+    .section-label{display:flex;align-items:center;justify-content:space-between;color:#718079;font:11px var(--mono);text-transform:uppercase}
+    .examples{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}
+    .example{border:1px solid #d6e0dc;background:rgba(255,255,255,.62);color:#43544e;padding:9px 13px;border-radius:7px;cursor:pointer;text-align:left;font-size:13px;transition:border-color .15s,background .15s,color .15s}
+    .example:hover{background:white;border-color:#81a99b;color:var(--green)}
+    #out{max-width:880px;margin-top:28px}
+    .result{background:var(--white);border:1px solid var(--line);border-radius:10px;overflow:hidden;animation:rise .35s ease both}
+    .result-head{padding:21px 24px;border-bottom:1px solid #e8eeeb;display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+    .result-kicker{font:11px var(--mono);color:var(--green);text-transform:uppercase}
+    .result-answer{font:600 19px/1.45 var(--display);margin:7px 0 0}
+    .result-meta{font:11px var(--mono);color:var(--muted);white-space:nowrap}
+    .table-wrap{overflow:auto;padding:4px 24px 18px}
+    table{width:100%;border-collapse:collapse;font-size:13px;min-width:400px}
+    th{text-align:left;color:#76837e;font:11px var(--mono);text-transform:uppercase;padding:13px 12px;border-bottom:1px solid var(--line)}
+    td{padding:12px;border-bottom:1px solid #edf1ef;color:#394a44}
+    tr:last-child td{border-bottom:0}
+    details{border-top:1px solid #e8eeeb;background:#f9fbfa}
+    summary{cursor:pointer;padding:13px 24px;color:#60716a;font:11px var(--mono);list-style:none}
+    summary:after{content:"+";float:right;color:var(--green);font-size:16px;line-height:11px}
+    details[open] summary:after{content:"-"}
+    pre{margin:0;padding:0 24px 18px;overflow:auto;color:#496059;font:12px/1.65 var(--mono);white-space:pre-wrap}
+    .message{padding:17px 20px;border:1px solid var(--line);border-radius:9px;background:white;color:#43544e}
+    .message.error{border-color:#e4c4bf;color:var(--red)}
+    .loading{display:flex;align-items:center;gap:12px;color:#62736c;padding:18px 4px;font-size:14px}
+    .spinner{height:17px;width:17px;border:2px solid #cbd9d3;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+    footer{border-top:1px solid rgba(23,37,34,.1);padding:19px 0;color:#84918c;font:11px var(--mono);display:flex;justify-content:space-between;gap:16px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:700px){.shell{width:min(100% - 32px,560px)}header{height:66px}.header-meta{font-size:11px;gap:10px}.header-meta .dataset-label{display:none}main{padding:47px 0 60px}h1{font-size:40px}.insight-orbit{width:75px;height:75px;right:0;top:8px;opacity:.7}.insight-orbit:before{inset:9px}.insight-orbit:after{inset:17px}.orbit-core{height:16px;width:16px}.intro-copy{max-width:84%;font-size:14px}.ask-panel{margin-top:30px}.ask-row{gap:8px;padding-left:7px}#q{font-size:14px}.go{padding:10px 12px}.go-label{display:none}.ask-foot{font-size:9px}.result-head{padding:17px;display:block}.result-meta{display:block;margin-top:10px}.table-wrap{padding:0 9px 12px}summary{padding:13px 17px}pre{padding:0 17px 16px}footer{font-size:9px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <div class="shell">
+    <header>
+      <a class="brand" href="/" aria-label="Signal BI home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 17.5 9 12l3.2 2.8L20 6.5" stroke="#d8f36a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 6.5H20v4.5" stroke="#d8f36a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="17.5" r="1.5" fill="white"/><circle cx="9" cy="12" r="1.5" fill="white"/><circle cx="12.2" cy="14.8" r="1.5" fill="white"/></svg></span>
+        <span class="brand-name">Signal <span>BI</span></span>
+      </a>
+      <div class="header-meta"><span class="dataset-state"><span class="live-dot"></span><span class="dataset-label">Sales data connected</span></span><span>DATA / 01</span></div>
+    </header>
+    <main>
+      <section class="intro">
+        <div class="eyebrow">Sales intelligence workspace</div>
+        <h1>Make the numbers<br><em>tell their story.</em></h1>
+        <p class="intro-copy">Ask a question in plain language. Get a clear answer, the figures behind it, and SQL you can verify.</p>
+        <div class="insight-orbit" aria-hidden="true"><span class="orbit-core"></span></div>
+      </section>
+      <section class="ask-panel" aria-label="Ask a sales question">
+        <div class="ask-row"><span class="spark" aria-hidden="true">✳</span><input id="q" maxlength="300" autocomplete="off" placeholder="Ask about your sales data..." aria-label="Your question"><button id="ask-button" class="go" type="button"><span class="go-label">Analyze</span><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 10h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="ask-foot"><span>PLAIN LANGUAGE QUERY</span><span>↵ ENTER TO ANALYZE</span></div>
+      </section>
+      <section class="suggestions" aria-label="Example questions"><div class="section-label"><span>Start with a question</span><span>EXAMPLES</span></div><div class="examples" id="ex"></div></section>
+      <section id="out" aria-live="polite" aria-busy="false"></section>
+    </main>
+    <footer><span>SIGNAL BI · SALES ANALYTICS</span><span>Answers grounded in your dataset</span></footer>
+  </div>
+  <script>
+    const $ = id => document.getElementById(id);
+    const button = $('ask-button');
+    fetch('/api/examples').then(response => {
+      if (!response.ok) throw new Error('Could not load question examples.');
+      return response.json();
+    }).then(examples => examples.forEach(text => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'example';
+      chip.textContent = text;
+      chip.addEventListener('click', () => { $('q').value = text; ask(); });
+      $('ex').appendChild(chip);
+    })).catch(() => {});
+    button.addEventListener('click', ask);
+    $('q').addEventListener('keydown', event => { if (event.key === 'Enter') ask(); });
+
+    async function ask() {
+      const question = $('q').value.trim();
+      if (!question) {
+        $('q').focus();
+        return;
+      }
+      const out = $('out');
+      out.setAttribute('aria-busy', 'true');
+      out.innerHTML = '<div class="loading"><span class="spinner" aria-hidden="true"></span><span>Reading the signal in your data...</span></div>';
+      button.disabled = true;
+      try {
+        const response = await fetch('/api/ask', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})});
+        const data = await response.json();
+        out.replaceChildren();
+        if (!response.ok) {
+          const message = document.createElement('div');
+          message.className = 'message error';
+          message.textContent = data.error || 'The question could not be analyzed.';
+          out.appendChild(message);
+          return;
+        }
+        const card = document.createElement('article');
+        card.className = 'result';
+        const head = document.createElement('div');
+        head.className = 'result-head';
+        const summary = document.createElement('div');
+        const kicker = document.createElement('div');
+        kicker.className = 'result-kicker';
+        kicker.textContent = 'Analysis / ' + data.intent.replaceAll('_', ' ');
+        const answer = document.createElement('p');
+        answer.className = 'result-answer';
+        answer.textContent = data.answer;
+        summary.append(kicker, answer);
+        const meta = document.createElement('span');
+        meta.className = 'result-meta';
+        meta.textContent = 'INTERPRETED BY ' + data.interpreted_by.toUpperCase();
+        head.append(summary, meta);
+        card.appendChild(head);
+        const tableWrap = document.createElement('div');
+        tableWrap.className = 'table-wrap';
+        const table = document.createElement('table');
+        const thead = table.createTHead().insertRow();
+        data.columns.forEach(column => { const th = document.createElement('th'); th.textContent = column; thead.appendChild(th); });
+        const tbody = table.createTBody();
+        data.rows.forEach(row => {
+          const tr = tbody.insertRow();
+          row.forEach(value => { const cell = tr.insertCell(); cell.textContent = value === null ? '-' : value; });
+        });
+        tableWrap.appendChild(table);
+        card.appendChild(tableWrap);
+        const details = document.createElement('details');
+        const summaryToggle = document.createElement('summary');
+        summaryToggle.textContent = 'VIEW SQL / VERIFY RESULT';
+        const sql = document.createElement('pre');
+        sql.textContent = data.sql + (data.params ? '\nparams: ' + JSON.stringify(data.params) : '');
+        details.append(summaryToggle, sql);
+        card.appendChild(details);
+        out.appendChild(card);
+      } catch (error) {
+        const message = document.createElement('div');
+        message.className = 'message error';
+        message.textContent = 'Could not reach the analysis service. Check that the local app is running and try again.';
+        out.replaceChildren(message);
+      } finally {
+        button.disabled = false;
+        out.setAttribute('aria-busy', 'false');
+      }
+    }
+  </script>
+</body>
+</html>
